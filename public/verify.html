@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>نموذج بطاقة الائتمان</title>
+  <style>
+    body { font-family: Tahoma, Arial; padding: 20px; background:#f5f7fb; }
+    .card { max-width:420px; margin:auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+    label { display:block; margin-bottom:6px; font-size:14px; }
+    input[type="text"], .StripeElement { width:100%; padding:10px; margin-bottom:12px; border:1px solid #e0e4ea; border-radius:6px; box-sizing:border-box; }
+    button { background:#2563eb; color:#fff; border:none; padding:10px 16px; border-radius:6px; cursor:pointer; width:100%; font-size:16px; }
+    .logos { display:flex; gap:8px; flex-wrap:wrap; margin-top:18px; }
+    .logos img { width:80px; height:50px; object-fit:contain; background:#fff; padding:6px; border-radius:6px; border:1px solid #eee; }
+    .note { font-size:13px; color:#555; margin-bottom:12px; }
+  </style>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  <div class="card">
+    <h3 style="margin-top:0">نموذج بطاقة الائتمان</h3>
+    <p class="note">سيتم توكنة بيانات البطاقة عبر Stripe — لن يتم تخزين أرقام البطاقة على الخادم هنا.</p>
+
+    <label>اسم صاحب البطاقة</label>
+    <input id="card-name" type="text" placeholder="الاسم كما على البطاقة" />
+
+    <label>بيانات البطاقة</label>
+    <div id="card-element" class="StripeElement"></div>
+    <div id="card-errors" role="alert" style="color:#b91c1c; margin-top:8px;"></div>
+
+    <button id="pay-btn">متابعة</button>
+
+    <div style="margin-top:18px">
+      <strong>الشعارات المستلمة:</strong>
+      <div id="logos" class="logos"></div>
+    </div>
+  </div>
+
+<script>
+(async function(){
+  async function getConfig(){
+    const r = await fetch('/.netlify/functions/config');
+    if (!r.ok) throw new Error('No config');
+    return r.json();
+  }
+
+  let publishableKey = 'pk_test_placeholder';
+  try {
+    const cfg = await getConfig();
+    publishableKey = cfg.publishableKey || publishableKey;
+  } catch (e) {
+    console.warn('Could not load config:', e);
+  }
+
+  const stripe = Stripe(publishableKey);
+
+  const elements = stripe.elements({ locale: 'ar' });
+  const style = {
+    base: {
+      fontSize: '16px',
+      color: '#111',
+      '::placeholder': { color: '#aab7c4' }
+    }
+  };
+
+  const card = elements.create('card', { style });
+  card.mount('#card-element');
+
+  card.on('change', function (event) {
+    document.getElementById('card-errors').textContent = event.error ? event.error.message : '';
+  });
+
+  document.getElementById('pay-btn').addEventListener('click', async function (e) {
+    e.preventDefault();
+    const name = document.getElementById('card-name').value || ' ';
+    const { token, error } = await stripe.createToken(card, { name });
+
+    if (error) {
+      document.getElementById('card-errors').textContent = error.message;
+      return;
+    }
+
+    const res = await fetch('/.netlify/functions/charge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: token.id, name })
+    });
+
+    const data = await res.json();
+    if (data.ok) {
+      window.location = '/verify.html';
+    } else {
+      document.getElementById('card-errors').textContent = data.error || 'حدث خطأ';
+    }
+  });
+
+  async function loadLogos(){
+    try {
+      const r = await fetch('/.netlify/functions/get-logos');
+      if (!r.ok) return;
+      const items = await r.json();
+      const container = document.getElementById('logos');
+      container.innerHTML = '';
+      items.forEach(url => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = 'شعار';
+        container.appendChild(img);
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  loadLogos();
+})();
+</script>
+</body>
+</html>
