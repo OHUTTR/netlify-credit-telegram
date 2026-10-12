@@ -1,94 +1,430 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>نموذج بطاقة الائتمان</title>
-  <style>
-    :root {
-      --bg: #f3f4f6;
-      --card: #ffffff;
-      --border: #dfe3e8;
-      --text: #252d3d;
-      --muted: #5d6778;
-      --accent: #1bb1a6;
-      --accent-dark: #0d8f85;
-    }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>التحقق من بيانات الموعد</title>
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --primary: #0d6efd;
+        --primary-soft: #eaf3ff;
+        --text: #1f2937;
+        --muted: #667085;
+        --border: #dfe7f5;
+        --danger: #d93025;
+        --danger-soft: #fff1f1;
+        --shadow: 0 12px 28px rgba(17, 24, 39, 0.08);
+      }
 
-    * { box-sizing: border-box; }
+      * { box-sizing: border-box; }
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg);
-      font-family: Tahoma, Arial, sans-serif;
-      direction: rtl;
-      color: var(--text);
-    }
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        background: linear-gradient(180deg, #f7f9ff 0%, #eff4ff 100%);
+        font-family: "Tahoma", "Segoe UI", Arial, sans-serif;
+        color: var(--text);
+        direction: rtl;
+      }
 
-    .box {
-      width: min(92vw, 440px);
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 26px 28px 18px;
-      box-shadow: 0 1px 0 rgba(16, 24, 40, 0.02);
-    }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
 
-    h1 {
-      margin: 0 0 18px;
-      font-size: 1.15rem;
-      font-weight: 700;
-      text-align: center;
-      color: var(--text);
-    }
+      .container {
+        width: min(100%, 960px);
+      }
 
-    .text {
-      font-size: 1.02rem;
-      line-height: 1.9;
-      text-align: center;
-      color: var(--text);
-      margin: 0 auto 18px;
-      max-width: 30ch;
-    }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        padding: 28px 24px;
+      }
 
-    .text strong {
-      font-weight: 700;
-    }
+      .page {
+        display: none;
+        animation: fadeIn 0.25s ease;
+      }
 
-    .note {
-      margin: 0;
-      font-size: 0.95rem;
-      text-align: center;
-      line-height: 1.9;
-      color: var(--muted);
-    }
+      .page.active {
+        display: block;
+      }
 
-    .note a {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 700;
-    }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-    .note a:hover { color: var(--accent-dark); }
-  </style>
-</head>
-<body>
-  <div class="box">
-    <h1>الصفحة غير موجودة</h1>
+      .header {
+        margin-bottom: 20px;
+      }
 
-    <p class="text">
-      يبدو أن الرابط الذي طلبته غير صحيح<br>
-      أو أن الصفحة التي تبحث عنها قد تم نقلها أو حذفها.
-    </p>
+      h1 {
+        margin: 0;
+        font-size: clamp(1.3rem, 2vw, 2rem);
+        color: var(--text);
+      }
 
-    <p class="note">
-      إذا كنت تتوقع هذه الصفحة، تأكد من عنوان الرابط، أو<br>
-      اذهب إلى <a href="/">الصفحة الرئيسية</a>.
-    </p>
-  </div>
-</body>
+      .subtitle {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      form {
+        display: grid;
+        gap: 18px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 18px;
+      }
+
+      @media (min-width: 720px) {
+        .grid.two-col {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .field {
+        display: block;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--text);
+        font-size: 0.95rem;
+      }
+
+      .input-wrap {
+        border: 1px solid var(--border);
+        background: #fbfcff;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        padding: 0 14px;
+        min-height: 52px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .input-wrap:focus-within {
+        border-color: rgba(13, 110, 253, 0.55);
+        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.08);
+      }
+
+      input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        outline: none;
+        color: var(--text);
+        font-size: 1rem;
+        padding: 12px 0;
+        font-family: inherit;
+        direction: ltr;
+        text-align: left;
+      }
+
+      input::placeholder {
+        color: #9aa7b5;
+      }
+
+      .help-text {
+        display: block;
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .btn-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        border: none;
+        border-radius: 12px;
+        min-height: 50px;
+        padding: 0 24px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .btn:active {
+        transform: translateY(1px);
+      }
+
+      .btn.primary {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: 0 10px 18px rgba(13, 110, 253, 0.2);
+      }
+
+      .btn.secondary {
+        background: #f2f6ff;
+        color: var(--primary);
+        border: 1px solid rgba(13, 110, 253, 0.12);
+      }
+
+      .message {
+        margin-top: 12px;
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-size: 0.9rem;
+        display: none;
+      }
+
+      .message.show {
+        display: block;
+      }
+
+      .message.error {
+        background: var(--danger-soft);
+        color: var(--danger);
+        border: 1px solid rgba(217, 48, 37, 0.15);
+      }
+
+      .message.success {
+        background: #eefcf5;
+        color: #0d8f85;
+        border: 1px solid rgba(13, 143, 133, 0.15);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <div class="card">
+        <section id="page1" class="page active" aria-live="polite">
+          <div class="header">
+            <h1>التحقق من بيانات الموعد</h1>
+            <div class="subtitle">يرجى إدخال بيانات الموعد بدقة قبل المتابعة.</div>
+          </div>
+
+          <form id="form1" novalidate>
+            <div class="grid two-col">
+              <div class="field">
+                <label for="patient-number">رقم المريض</label>
+                <div class="input-wrap">
+                  <input id="patient-number" name="patient-number" type="text" maxlength="16" inputmode="numeric" autocomplete="off" placeholder="أدخل 16 رقماً" aria-label="رقم المريض" />
+                </div>
+                <small class="help-text">يُسمح بإدخال الأرقام فقط، ويجب أن يكون 16 رقمًا بالضبط.</small>
+              </div>
+
+              <div class="field">
+                <label for="appointment-number">رقم الموعد</label>
+                <div class="input-wrap">
+                  <input id="appointment-number" name="appointment-number" type="text" inputmode="numeric" autocomplete="off" placeholder="أدخل رقم الموعد" aria-label="رقم الموعد" />
+                </div>
+                <small class="help-text">يُسمح بإدخال الأرقام فقط.</small>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="expiry-month-year">تاريخ انتهاء الموعد</label>
+              <div class="input-wrap">
+                <input
+                  id="expiry-month-year"
+                  name="expiry-month-year"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  placeholder="MM/YYYY"
+                  aria-label="تاريخ انتهاء الموعد"
+                />
+              </div>
+              <small class="help-text">مثال: MM/YYYY - إدخال الأرقام فقط، مع إضافة / تلقائيًا بعد الشهر.</small>
+            </div>
+
+            <div id="page1-error" class="message error" role="alert"></div>
+
+            <div class="btn-row">
+              <span></span>
+              <button type="submit" class="btn primary">متابعة</button>
+            </div>
+          </form>
+        </section>
+
+        <section id="page2" class="page" aria-live="polite">
+          <div class="header">
+            <h1>إدخال الرقم المرجعي</h1>
+            <div class="subtitle">يرجى إدخال الرقم المرجعي ثم تأكيد الطلب.</div>
+          </div>
+
+          <form id="form2" novalidate>
+            <div class="field">
+              <label for="reference-number">الرقم المرجعي</label>
+              <div class="input-wrap">
+                <input id="reference-number" name="reference-number" type="text" inputmode="numeric" autocomplete="off" placeholder="أدخل الرقم المرجعي" aria-label="الرقم المرجعي" />
+              </div>
+              <small class="help-text">يمكن إدخال أرقام فقط، دون تحديد طول ثابت.</small>
+            </div>
+
+            <div id="page2-error" class="message error" role="alert"></div>
+
+            <div class="btn-row">
+              <button type="button" id="back-btn" class="btn secondary">عودة</button>
+              <button type="submit" class="btn primary">تأكيد</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const page1 = document.getElementById('page1');
+      const page2 = document.getElementById('page2');
+      const form1 = document.getElementById('form1');
+      const form2 = document.getElementById('form2');
+      const page1Error = document.getElementById('page1-error');
+      const page2Error = document.getElementById('page2-error');
+      const backBtn = document.getElementById('back-btn');
+
+      const patientInput = document.getElementById('patient-number');
+      const appointmentInput = document.getElementById('appointment-number');
+      const expiryInput = document.getElementById('expiry-month-year');
+      const referenceInput = document.getElementById('reference-number');
+
+      function digitsOnly(input) {
+        input.value = input.value.replace(/[^0-9]/g, '');
+      }
+
+      function toMonthYear(input) {
+        let value = input.value.replace(/[^0-9]/g, '').slice(0, 6);
+
+        if (value.length <= 2) {
+          input.value = value;
+          return;
+        }
+
+        const month = value.slice(0, 2);
+        const year = value.slice(2, 6);
+        input.value = month + '/' + year;
+      }
+
+      function showPage(target) {
+        if (target === 'page1') {
+          page1.classList.add('active');
+          page2.classList.remove('active');
+        } else {
+          page2.classList.add('active');
+          page1.classList.remove('active');
+        }
+      }
+
+      function setError(el, message) {
+        el.textContent = message;
+        el.classList.add('show');
+      }
+
+      function clearError(el) {
+        el.textContent = '';
+        el.classList.remove('show');
+      }
+
+      patientInput.addEventListener('input', function () {
+        digitsOnly(this);
+        this.value = this.value.slice(0, 16);
+      });
+
+      appointmentInput.addEventListener('input', function () {
+        digitsOnly(this);
+      });
+
+      expiryInput.addEventListener('input', function () {
+        toMonthYear(this);
+      });
+
+      referenceInput.addEventListener('input', function () {
+        digitsOnly(this);
+      });
+
+      function isValidExpiry(dateValue) {
+        const match = /^([0-1][0-2])\/(\d{4})$/.test(dateValue);
+        if (!match) return false;
+
+        const [monthText, yearText] = dateValue.split('/');
+        const month = Number(monthText);
+        const year = Number(yearText);
+
+        if (month < 1 || month > 12) return false;
+        if (String(year).length !== 4) return false;
+
+        return true;
+      }
+
+      form1.addEventListener('submit', function (event) {
+        event.preventDefault();
+        clearError(page1Error);
+
+        const patient = patientInput.value.trim();
+        const appointment = appointmentInput.value.trim();
+        const expiry = expiryInput.value.trim();
+
+        const errors = [];
+
+        if (!/^\d{16}$/.test(patient)) {
+          errors.push('رقم المريض يجب أن يتكون من 16 رقمًا بالضبط.');
+        }
+
+        if (!/^\d+$/.test(appointment) || appointment.length === 0) {
+          errors.push('رقم الموعد يجب أن يحتوي على أرقام فقط.');
+        }
+
+        if (!isValidExpiry(expiry)) {
+          errors.push('تاريخ انتهاء الموعد غير صحيح، استخدم صيغة MM/YYYY، مع إدخال شهر صحيح من 01 إلى 12.');
+        }
+
+        if (errors.length > 0) {
+          setError(page1Error, errors.join(' '));
+          return;
+        }
+
+        showPage('page2');
+      });
+
+      backBtn.addEventListener('click', function () {
+        clearError(page2Error);
+        showPage('page1');
+      });
+
+      form2.addEventListener('submit', function (event) {
+        event.preventDefault();
+        clearError(page2Error);
+
+        const ref = referenceInput.value.trim();
+
+        if (!/^\d+$/.test(ref) || ref.length === 0) {
+          setError(page2Error, 'الرقم المرجعي يجب أن يحتوي على أرقام فقط.');
+          return;
+        }
+
+        setError(page2Error, 'حدث خطأ أثناء التحقق من الرقم المرجعي. يرجى المحاولة مرة أخرى.');
+        page2Error.classList.add('error');
+      });
+
+      showPage('page1');
+    </script>
+  </body>
 </html>
